@@ -6,6 +6,7 @@ import { FormType, EVALUATION_CRITERIA } from '@/types/forms';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import { Tooltip } from './Tooltip';
 import { SignatureField } from './SignatureField';
+import { ScoreSlider } from './ScoreSlider';
 
 interface EvaluationTableProps {
   formType: FormType;
@@ -64,139 +65,68 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
         Critérios de Avaliação
       </h3>
 
-      <div className="overflow-x-auto">
-        <table className={`min-w-full divide-y ${themeClasses.border}`}>
-          <thead className={`${themeClasses.bgSecondary}`}>
-            <tr>
-              <th className={`px-6 py-4 text-left text-xs font-bold ${themeClasses.textPrimary} uppercase tracking-wider`}>
-                Critério
-              </th>
-              <th className={`px-6 py-4 text-center text-xs font-bold ${themeClasses.textPrimary} uppercase tracking-wider`}>
-                Nota Máxima
-              </th>
-              <th className={`px-6 py-4 text-left text-xs font-bold ${themeClasses.textPrimary} uppercase tracking-wider`}>
-                Nota Obtida
-              </th>
-              <th className={`px-6 py-4 text-left text-xs font-bold ${themeClasses.textPrimary} uppercase tracking-wider`}>
-                Observações
-              </th>
-            </tr>
-          </thead>
-          <tbody className={`${themeClasses.bgPrimary} divide-y ${themeClasses.border}`}>
-            {criteria.map((criterion) => (
-              <tr key={criterion.id} className={`hover:${themeClasses.bgSecondary} transition-colors duration-200`}>
-                <td className={`px-6 py-4 whitespace-nowrap text-sm font-semibold ${themeClasses.textPrimary}`}>
+      {/* Layout em Cards - Todos os tamanhos */}
+      <div className="space-y-4">
+        {/* Grid responsivo para os critérios */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {criteria.map((criterion) => (
+            <div key={criterion.id} className={`${themeClasses.card} p-4 space-y-3`}>
+              <div className="flex justify-between items-start">
+                <h4 className={`text-sm font-semibold ${themeClasses.textPrimary} flex-1 pr-2`}>
                   {criterion.description}
-                </td>
-                <td className={`px-6 py-4 whitespace-nowrap text-center`}>
-                  <span className={`text-lg font-bold ${themeClasses.textPrimary}`}>
-                    {criterion.maxScore}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <Tooltip content={`Digite uma nota de 0 a ${criterion.maxScore} para ${criterion.description.toLowerCase()}`}>
-                    <div className="flex items-center gap-3">
-                      <input
-                        {...register(`scores.${criterion.id}`, {
-                          required: 'Nota é obrigatória',
-                          min: { value: 0, message: 'Nota mínima é 0' },
-                          max: { value: criterion.maxScore, message: `Nota máxima é ${criterion.maxScore}` },
-                          valueAsNumber: true,
-                          validate: (value) => {
-                            if (value > criterion.maxScore) {
-                              return `Nota não pode ser maior que ${criterion.maxScore}`;
-                            }
-                            if (value < 0) {
-                              return 'Nota não pode ser negativa';
-                            }
-                            return true;
-                          }
-                        })}
-                        type="number"
-                        min="0"
-                        max={criterion.maxScore}
-                        step="0.1"
-                        className={`w-20 px-3 py-2 rounded-lg shadow-sm transition-all duration-200
-                                   ${themeClasses.input} font-bold text-center text-base
-                                   border-2 focus:scale-105 hover:shadow-md
-                                   ${errors?.scores?.[criterion.id] ?
-                                     'border-red-500 dark:border-red-400 high-contrast:border-red-400 animate-pulse' : ''}`}
-                        placeholder="0.0"
-                        onChange={(e) => {
-                          const target = e.target as HTMLInputElement;
-                          let value = parseFloat(target.value);
+                </h4>
+                <span className={`text-xs font-bold ${themeClasses.textSecondary} bg-gray-100 dark:bg-gray-800 high-contrast:bg-gray-600 px-2 py-1 rounded`}>
+                  Max: {criterion.maxScore}
+                </span>
+              </div>
+              <div className="w-full">
+                <ScoreSlider
+                  value={scores[criterion.id] || criterion.maxScore / 2}
+                  onChange={(value) => setValue(`scores.${criterion.id}`, value, { shouldValidate: true })}
+                  max={criterion.maxScore}
+                  step={0.1}
+                  name={`scores.${criterion.id}`}
+                  required
+                  error={errors?.scores?.[criterion.id]?.message}
+                />
+              </div>
+            </div>
+          ))}
 
-                          if (isNaN(value)) value = 0;
-                          if (value > criterion.maxScore) value = criterion.maxScore;
-                          if (value < 0) value = 0;
+        </div>
 
-                          setValue(`scores.${criterion.id}`, value, { shouldValidate: true });
-                          if (parseFloat(target.value) !== value) {
-                            target.value = value.toString();
-                          }
-                        }}
-                      />
-                      <span className={`text-sm font-medium ${themeClasses.textSecondary}`}>
-                        / {criterion.maxScore}
-                      </span>
-                    </div>
-                  </Tooltip>
-                  {errors?.scores?.[criterion.id] && (
-                    <p className={`mt-2 text-xs font-medium ${themeClasses.error} flex items-center gap-1`}>
-                      <span>⚠</span>
-                      {errors.scores[criterion.id].message}
-                    </p>
-                  )}
-                </td>
-                <td className="px-6 py-4">
-                  <textarea
-                    {...register(`comments.${criterion.id}`)}
-                    rows={2}
-                    className={`w-full px-3 py-2 rounded-lg shadow-sm transition-all duration-200
-                               ${themeClasses.input} text-sm resize-none`}
-                    placeholder="Observações sobre este critério..."
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot className={`${themeClasses.bgAccent} border-t-2 ${themeClasses.border}`}>
-            <tr>
-              <td className={`px-6 py-5 whitespace-nowrap text-sm font-bold ${themeClasses.textPrimary} uppercase tracking-wide`}>
-                NOTA FINAL
-              </td>
-              <td className={`px-6 py-5 text-center whitespace-nowrap text-sm ${themeClasses.textSecondary} font-medium`}>
-                -
-              </td>
-              <td className="px-6 py-5 whitespace-nowrap">
-                <Tooltip content={`Nota final calculada: (${criteria.map(c => {
-                  const score = scores[c.id] || 0;
-                  const validScore = Math.min(score, c.maxScore);
-                  return `${validScore.toFixed(1)}`;
-                }).join(' + ')}) / ${criteria.reduce((sum, c) => sum + c.maxScore, 0)} × 10 = ${finalScore.toFixed(1)}`}>
-                  <div className={`w-24 px-3 py-2 rounded-lg shadow-md text-xl font-bold text-center
-                                 transition-all duration-300 border-2 cursor-help
-                                 ${finalScore >= 6
-                                   ? 'bg-green-100 dark:bg-green-900/30 high-contrast:bg-green-400 border-green-500 text-green-700 dark:text-green-400 high-contrast:text-black'
-                                   : 'bg-red-100 dark:bg-red-900/30 high-contrast:bg-red-400 border-red-500 text-red-700 dark:text-red-400 high-contrast:text-black'
-                                 }`}>
-                    {finalScore.toFixed(1)}
-                  </div>
-                </Tooltip>
-              </td>
-              <td className="px-6 py-5">
-                <div className={`px-4 py-2 rounded-full text-sm font-bold text-center uppercase tracking-wide
-                               transition-all duration-300 shadow-md
+        {/* Nota Final */}
+        <div className={`${themeClasses.card} p-6 border-2 ${themeClasses.border}`}>
+          <div className="text-center space-y-4">
+            <h4 className={`text-xl font-bold ${themeClasses.textPrimary} uppercase tracking-wide`}>
+              NOTA FINAL
+            </h4>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Tooltip content={`Nota final calculada: (${criteria.map(c => {
+                const score = scores[c.id] || 0;
+                const validScore = Math.min(score, c.maxScore);
+                return `${validScore.toFixed(1)}`;
+              }).join(' + ')}) / ${criteria.reduce((sum, c) => sum + c.maxScore, 0)} × 10 = ${finalScore.toFixed(1)}`}>
+                <div className={`px-6 py-3 rounded-lg shadow-md text-3xl font-bold text-center
+                               transition-all duration-300 border-2 cursor-help
                                ${finalScore >= 6
-                                 ? 'bg-green-500 dark:bg-green-600 high-contrast:bg-green-400 text-white high-contrast:text-black'
-                                 : 'bg-red-500 dark:bg-red-600 high-contrast:bg-red-400 text-white high-contrast:text-black'
+                                 ? 'bg-green-100 dark:bg-green-900/30 high-contrast:bg-green-400 border-green-500 text-green-700 dark:text-green-400 high-contrast:text-black'
+                                 : 'bg-red-100 dark:bg-red-900/30 high-contrast:bg-red-400 border-red-500 text-red-700 dark:text-red-400 high-contrast:text-black'
                                }`}>
-                  {finalScore >= 6 ? '✓ APROVADO' : '✗ REPROVADO'}
+                  {finalScore.toFixed(1)}
                 </div>
-              </td>
-            </tr>
-          </tfoot>
-        </table>
+              </Tooltip>
+              <div className={`px-6 py-3 rounded-full text-base font-bold text-center uppercase tracking-wide
+                             transition-all duration-300 shadow-md
+                             ${finalScore >= 6
+                               ? 'bg-green-500 dark:bg-green-600 high-contrast:bg-green-400 text-white high-contrast:text-black'
+                               : 'bg-red-500 dark:bg-red-600 high-contrast:bg-red-400 text-white high-contrast:text-black'
+                             }`}>
+                {finalScore >= 6 ? '✓ APROVADO' : '✗ REPROVADO'}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="mt-8">

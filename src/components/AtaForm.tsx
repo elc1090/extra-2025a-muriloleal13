@@ -5,6 +5,7 @@ import { UseFormRegister, UseFormWatch, UseFormSetValue } from 'react-hook-form'
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import { FormField } from './FormField';
 import { SignatureField } from './SignatureField';
+import { ScoreSlider } from './ScoreSlider';
 
 interface AtaFormProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -146,53 +147,30 @@ export const AtaForm: React.FC<AtaFormProps> = ({ register, watch, setValue }) =
           <h4 className={`text-lg font-semibold ${themeClasses.textPrimary} mb-4`}>
             Avaliação
           </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="relative">
-              <label className={`block text-sm font-bold ${themeClasses.textPrimary} mb-2`}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-3">
+              <label className={`block text-sm font-bold ${themeClasses.textPrimary}`}>
                 Nota Final *
               </label>
-              <input
-                {...register('scores.nota_final', {
-                  required: 'Nota final é obrigatória',
-                  min: { value: 0, message: 'Nota mínima é 0' },
-                  max: { value: 10, message: 'Nota máxima é 10' },
-                  valueAsNumber: true,
-                  validate: (value) => {
-                    if (value > 10) return 'Nota não pode ser maior que 10';
-                    if (value < 0) return 'Nota não pode ser negativa';
-                    return true;
-                  }
-                })}
-                type="number"
-                min="0"
-                max="10"
-                step="0.1"
-                placeholder="0.0"
-                className={`w-full px-4 py-3 rounded-lg shadow-sm transition-all duration-200
-                           ${themeClasses.input} font-bold text-center text-lg
-                           border-2 focus:scale-105 hover:shadow-md`}
-                onChange={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  let value = parseFloat(target.value);
-                  if (isNaN(value)) value = 0;
-                  if (value > 10) value = 10;
-                  if (value < 0) value = 0;
-                  setValue('scores.nota_final', value, { shouldValidate: true });
-                  if (parseFloat(target.value) !== value) {
-                    target.value = value.toString();
-                  }
-                }}
-              />
-
-              <div className={`mt-3 text-center`}>
-                <span className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold
-                               transition-all duration-300 shadow-md
-                               ${notaFinal >= 6
-                                 ? 'bg-green-500 dark:bg-green-600 high-contrast:bg-green-400 text-white high-contrast:text-black'
-                                 : 'bg-red-500 dark:bg-red-600 high-contrast:bg-red-400 text-white high-contrast:text-black'
-                               }`}>
-                  {notaFinal >= 6 ? '✓ APROVADO' : '✗ REPROVADO'}
-                </span>
+              <div className="space-y-3">
+                <ScoreSlider
+                  value={notaFinal || 5}
+                  onChange={(value) => setValue('scores.nota_final', value, { shouldValidate: true })}
+                  max={10}
+                  step={0.1}
+                  name="scores.nota_final"
+                  required
+                />
+                <div className="flex justify-center">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
+                                 transition-all duration-300 shadow-md uppercase tracking-wide
+                                 ${notaFinal >= 6
+                                   ? 'bg-green-500 dark:bg-green-600 high-contrast:bg-green-400 text-white high-contrast:text-black'
+                                   : 'bg-red-500 dark:bg-red-600 high-contrast:bg-red-400 text-white high-contrast:text-black'
+                                 }`}>
+                    {notaFinal >= 6 ? '✓ APROVADO' : '✗ REPROVADO'}
+                  </span>
+                </div>
               </div>
             </div>
 

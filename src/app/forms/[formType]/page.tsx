@@ -9,7 +9,7 @@ import { Header } from '@/components/Header';
 import { FormField } from '@/components/FormField';
 import { EvaluationTable } from '@/components/EvaluationTable';
 import { AtaForm } from '@/components/AtaForm';
-import { FormType, FormData, StudentInfo, EvaluatorInfo } from '@/types/forms';
+import { FormType, FormData, StudentInfo, EvaluatorInfo, EVALUATION_CRITERIA } from '@/types/forms';
 import { parseUrlParams, getFormTitle, getFormDescription } from '@/utils/urlUtils';
 import { generateFormPDF } from '@/utils/pdfGenerator';
 import { useThemeClasses } from '@/contexts/ThemeContext';
@@ -44,6 +44,21 @@ export default function FormPage() {
   const [hasSavedData, setHasSavedData] = useState<boolean>(false);
   const themeClasses = useThemeClasses();
 
+  // Função para inicializar scores com valores no meio
+  const getInitialScores = () => {
+    const scores: Record<string, number> = {};
+
+    if (formType === 'ata_apresentacao') {
+      scores.nota_final = 5; // Meio de 0-10
+    } else if (EVALUATION_CRITERIA[formType]) {
+      EVALUATION_CRITERIA[formType].forEach(criterion => {
+        scores[criterion.id] = criterion.maxScore / 2;
+      });
+    }
+
+    return scores;
+  };
+
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormValues>({
     defaultValues: {
       studentInfo: {
@@ -75,7 +90,7 @@ export default function FormPage() {
       presentationTime: '',
       room: '',
       finalDeliveryDate: '',
-      scores: {},
+      scores: getInitialScores(),
       comments: {},
       generalComments: '',
       finalScore: 0

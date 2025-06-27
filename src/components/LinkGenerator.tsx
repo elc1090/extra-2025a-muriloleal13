@@ -57,20 +57,21 @@ export const LinkGenerator: React.FC<LinkGeneratorProps> = ({ formType }) => {
   };
 
   return (
-    <div className={`${themeClasses.card} p-8 animate-slide-up`} style={{ animationDelay: '200ms' }}>
+    <div className={`${themeClasses.card} p-6 sm:p-8`}>
       <h3 className={`text-xl font-bold ${themeClasses.textPrimary} mb-6 flex items-center gap-3`}>
         <div className={`p-2 rounded-lg ${themeClasses.bgAccent}`}>
           <Share2 className={`h-5 w-5 ${themeClasses.textPrimary}`} />
         </div>
-        Gerador de Link Pré-preenchido
+        <span className="hidden sm:inline">Gerador de Link Pré-preenchido</span>
+        <span className="sm:hidden">Gerador de Link</span>
       </h3>
 
       <p className={`text-sm ${themeClasses.textSecondary} mb-6`}>
         Preencha os campos abaixo para gerar um link que pré-preencherá o formulário com essas informações.
       </p>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField
             label="Nome do Aluno"
             name="studentName"
@@ -122,7 +123,7 @@ export const LinkGenerator: React.FC<LinkGeneratorProps> = ({ formType }) => {
           placeholder="Título completo do TCC"
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField
             label="Nome do Avaliador"
             name="evaluatorName"
@@ -145,16 +146,13 @@ export const LinkGenerator: React.FC<LinkGeneratorProps> = ({ formType }) => {
           register={register}
         />
 
-        <div className="flex gap-3 pt-6">
+        <div className="flex flex-col sm:flex-row gap-3 pt-6">
           <button
             type="submit"
-            className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
-                     high-contrast:bg-yellow-400 high-contrast:hover:bg-yellow-500
-                     text-white dark:text-white high-contrast:text-black
-                     high-contrast:font-bold px-6 py-3 rounded-lg font-semibold
-                     transition-all duration-200 hover:scale-105
-                     focus:outline-none focus:ring-2 focus:ring-offset-2
-                     shadow-md hover:shadow-lg"
+            className={`${themeClasses.btnPrimary} px-6 py-3 rounded-lg font-semibold
+                       transition-all duration-200 hover:scale-105
+                       focus:outline-none focus:ring-2 focus:ring-offset-2
+                       shadow-md hover:shadow-lg flex-1 sm:flex-none`}
           >
             Gerar Link
           </button>
@@ -165,7 +163,7 @@ export const LinkGenerator: React.FC<LinkGeneratorProps> = ({ formType }) => {
             className={`${themeClasses.btnSecondary} px-6 py-3 rounded-lg font-semibold
                        transition-all duration-200 hover:scale-105
                        focus:outline-none focus:ring-2 focus:ring-offset-2
-                       shadow-md hover:shadow-lg`}
+                       shadow-md hover:shadow-lg flex-1 sm:flex-none`}
           >
             Limpar
           </button>
@@ -173,32 +171,34 @@ export const LinkGenerator: React.FC<LinkGeneratorProps> = ({ formType }) => {
       </form>
 
       {generatedUrl && (
-        <div className={`mt-8 p-6 ${themeClasses.bgAccent} rounded-xl border ${themeClasses.border} animate-slide-up`}>
+        <div className={`mt-8 p-4 sm:p-6 ${themeClasses.bgAccent} rounded-xl border ${themeClasses.border} animate-slide-up`}>
           <h4 className={`text-lg font-bold ${themeClasses.textPrimary} mb-4 flex items-center gap-2`}>
             <ExternalLink className={`h-5 w-5 ${themeClasses.textPrimary}`} />
-            Link Gerado:
+            <span className="hidden sm:inline">Link Gerado:</span>
+            <span className="sm:hidden">Link:</span>
           </h4>
 
-          <div className="flex items-center gap-3 mb-4">
+          <div className="mb-4">
             <input
               type="text"
               value={generatedUrl}
               readOnly
-              className={`flex-1 px-4 py-3 ${themeClasses.input} rounded-lg text-sm font-mono
-                         focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text`}
+              className={`w-full px-4 py-3 ${themeClasses.input} rounded-lg text-xs sm:text-sm font-mono
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-text
+                         break-all`}
             />
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={handleCopyUrl}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700
-                       dark:bg-green-500 dark:hover:bg-green-600
-                       high-contrast:bg-green-400 high-contrast:hover:bg-green-500
-                       text-white high-contrast:text-black high-contrast:font-bold
-                       rounded-lg transition-all duration-200 hover:scale-105
-                       focus:outline-none focus:ring-2 focus:ring-green-500
-                       shadow-md hover:shadow-lg text-sm font-semibold"
+              className={`flex items-center justify-center gap-2 px-4 py-2
+                         bg-green-600 hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600
+                         high-contrast:bg-green-400 high-contrast:hover:bg-green-500
+                         text-white high-contrast:text-black high-contrast:font-bold
+                         rounded-lg transition-all duration-200 hover:scale-105
+                         focus:outline-none focus:ring-2 focus:ring-green-500
+                         shadow-md hover:shadow-lg text-sm font-semibold flex-1 sm:flex-none`}
             >
               <Copy size={16} />
               Copiar
@@ -206,13 +206,10 @@ export const LinkGenerator: React.FC<LinkGeneratorProps> = ({ formType }) => {
 
             <button
               onClick={handleShareUrl}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700
-                       dark:bg-blue-500 dark:hover:bg-blue-600
-                       high-contrast:bg-yellow-400 high-contrast:hover:bg-yellow-500
-                       text-white high-contrast:text-black high-contrast:font-bold
-                       rounded-lg transition-all duration-200 hover:scale-105
-                       focus:outline-none focus:ring-2 focus:ring-blue-500
-                       shadow-md hover:shadow-lg text-sm font-semibold"
+              className={`flex items-center justify-center gap-2 px-4 py-2
+                         ${themeClasses.btnPrimary} rounded-lg transition-all duration-200 hover:scale-105
+                         focus:outline-none focus:ring-2 focus:ring-offset-2
+                         shadow-md hover:shadow-lg text-sm font-semibold flex-1 sm:flex-none`}
             >
               <Share2 size={16} />
               Compartilhar
@@ -220,13 +217,10 @@ export const LinkGenerator: React.FC<LinkGeneratorProps> = ({ formType }) => {
 
             <button
               onClick={handleOpenUrl}
-              className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700
-                       dark:bg-purple-500 dark:hover:bg-purple-600
-                       high-contrast:bg-purple-400 high-contrast:hover:bg-purple-500
-                       text-white high-contrast:text-black high-contrast:font-bold
-                       rounded-lg transition-all duration-200 hover:scale-105
-                       focus:outline-none focus:ring-2 focus:ring-purple-500
-                       shadow-md hover:shadow-lg text-sm font-semibold"
+              className={`flex items-center justify-center gap-2 px-4 py-2
+                         ${themeClasses.btnSecondary} rounded-lg transition-all duration-200 hover:scale-105
+                         focus:outline-none focus:ring-2 focus:ring-offset-2
+                         shadow-md hover:shadow-lg text-sm font-semibold flex-1 sm:flex-none`}
             >
               <ExternalLink size={16} />
               Abrir
