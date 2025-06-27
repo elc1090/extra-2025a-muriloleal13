@@ -9,7 +9,7 @@ import { Header } from '@/components/Header';
 import { FormField } from '@/components/FormField';
 import { EvaluationTable } from '@/components/EvaluationTable';
 import { AtaForm } from '@/components/AtaForm';
-import { FormType, FormData, StudentInfo, EvaluatorInfo, PrefilledData } from '@/types/forms';
+import { FormType, FormData, StudentInfo, EvaluatorInfo } from '@/types/forms';
 import { parseUrlParams, getFormTitle, getFormDescription } from '@/utils/urlUtils';
 import { generateFormPDF } from '@/utils/pdfGenerator';
 import { useThemeClasses } from '@/contexts/ThemeContext';
@@ -40,7 +40,6 @@ interface FormValues {
 export default function FormPage() {
   const params = useParams();
   const formType = params.formType as FormType;
-  const [prefilledData, setPrefilledData] = useState<PrefilledData>({});
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const themeClasses = useThemeClasses();
 
@@ -84,7 +83,6 @@ export default function FormPage() {
 
   useEffect(() => {
     const urlData = parseUrlParams();
-    setPrefilledData(urlData);
     if (urlData.studentName) setValue('studentInfo.name', urlData.studentName);
     if (urlData.registration) setValue('studentInfo.registration', urlData.registration);
     if (urlData.course) setValue('studentInfo.course', urlData.course);
@@ -146,7 +144,7 @@ export default function FormPage() {
       localStorage.setItem(`tcc_form_${formType}`, JSON.stringify(formData));
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
-    } catch (error) {
+    } catch {
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 2000);
     }
@@ -158,6 +156,7 @@ export default function FormPage() {
       if (savedData) {
         const data = JSON.parse(savedData);
         Object.entries(data).forEach(([key, value]) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           setValue(key as any, value);
         });
         setSaveStatus('saved');
@@ -166,7 +165,7 @@ export default function FormPage() {
         setSaveStatus('error');
         setTimeout(() => setSaveStatus('idle'), 2000);
       }
-    } catch (error) {
+    } catch {
       setSaveStatus('error');
       setTimeout(() => setSaveStatus('idle'), 2000);
     }

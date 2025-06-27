@@ -17,7 +17,7 @@ export const LinkGenerator: React.FC<LinkGeneratorProps> = ({ formType }) => {
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const themeClasses = useThemeClasses();
 
-  const { register, handleSubmit, watch, reset } = useForm<PrefilledData>();
+  const { register, handleSubmit, reset } = useForm<PrefilledData>();
 
   const courseOptions = [
     { value: 'CC', label: 'Ciência da Computação' },

@@ -8,6 +8,7 @@ interface FormFieldProps {
   label: string;
   name: string;
   type?: 'text' | 'email' | 'number' | 'date' | 'time' | 'textarea' | 'select';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: UseFormRegister<any>;
   error?: FieldError;
   placeholder?: string;

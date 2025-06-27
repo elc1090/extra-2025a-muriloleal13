@@ -7,7 +7,7 @@ import { ArrowLeft, Share2, Info, CheckCircle, ExternalLink } from 'lucide-react
 
 import { LinkGenerator } from '@/components/LinkGenerator';
 import { FormType } from '@/types/forms';
-import { getFormTitle, getFormDescription } from '@/utils/urlUtils';
+import { getFormTitle } from '@/utils/urlUtils';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import { ThemeSelector } from '@/components/ThemeSelector';
 

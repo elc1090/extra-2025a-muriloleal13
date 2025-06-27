@@ -2,16 +2,20 @@
 
 import React, { useEffect } from 'react';
 import { UseFormRegister, UseFormWatch, UseFormSetValue } from 'react-hook-form';
-import { EvaluationCriteria, FormType, EVALUATION_CRITERIA } from '@/types/forms';
+import { FormType, EVALUATION_CRITERIA } from '@/types/forms';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import { Tooltip } from './Tooltip';
 import { SignatureField } from './SignatureField';
 
 interface EvaluationTableProps {
   formType: FormType;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   register: UseFormRegister<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   watch: UseFormWatch<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: UseFormSetValue<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors?: any;
 }
 

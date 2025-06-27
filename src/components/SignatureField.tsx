@@ -268,7 +268,7 @@ export const SignatureField: React.FC<SignatureFieldProps> = ({
               onClick={() => fileInputRef.current?.click()}
               disabled={disabled}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
-                         ${themeClasses.button} ${themeClasses.buttonHover}`}
+                         ${themeClasses.btnSecondary}`}
             >
               📁 Selecionar Imagem
             </button>

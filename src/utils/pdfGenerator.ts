@@ -154,7 +154,7 @@ export class PDFGenerator {
   }
 
   private addSignature(formData: FormData, startY: number) {
-    let yPos = startY + 20;
+    const yPos = startY + 20;
 
     this.doc.setFontSize(10);
     this.doc.setFont('helvetica', 'normal');

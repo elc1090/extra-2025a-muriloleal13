@@ -42,6 +42,7 @@ export const parseUrlParams = (): PrefilledData => {
   validFields.forEach(field => {
     const value = params.get(field);
     if (value) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (data as any)[field] = value;
     }
   });
