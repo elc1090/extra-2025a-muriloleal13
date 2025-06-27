@@ -2,6 +2,14 @@
 
 Sistema web para avaliação de Trabalhos de Conclusão de Curso dos cursos de Ciência da Computação e Sistemas de Informação da Universidade Federal de Santa Maria.
 
+![EvalTCC](./public/assets/evaltcc-home.png "Screenshot do projeto")
+
+Acesso: https://evaltcc.netlify.app/
+
+### Desenvolvedor
+
+Murilo Leal - Ciência da Computação - UFSM
+
 ## 🎯 Funcionalidades
 
 - **Formulários Digitais Responsivos**: Interface otimizada para desktop e mobile
@@ -147,47 +155,6 @@ http://localhost:3000/forms/avaliacao_final_cc?studentName=João%20Silva&registr
 - **Status**: Aprovado (≥6.0) ou Reprovado (<6.0)
 - **Observações**: Campo para comentários por critério e observações gerais
 
-## 🔧 Desenvolvimento
-
-### Comandos Disponíveis
-
-```bash
-# Desenvolvimento
-npm run dev
-
-# Build para produção
-npm run build
-
-# Iniciar versão de produção
-npm run start
-
-# Linting
-npm run lint
-```
-
-### Adicionando Novos Formulários
-
-1. **Defina o tipo** em `src/types/forms.ts`:
-
-```typescript
-export type FormType = 'novo_formulario' | ...;
-```
-
-2. **Adicione os critérios** em `EVALUATION_CRITERIA`:
-
-```typescript
-novo_formulario: [
-  {
-    id: "criterio_1",
-    description: "Descrição do critério",
-    weight: 2,
-    maxScore: 10,
-  },
-];
-```
-
-3. **Atualize a página inicial** em `src/app/page.tsx`
-
 ## 📱 Responsividade
 
 O sistema foi desenvolvido com foco em responsividade, funcionando adequadamente em:
@@ -206,16 +173,6 @@ O sistema foi desenvolvido com foco em responsividade, funcionando adequadamente
 
 Este projeto foi desenvolvido para uso acadêmico na Universidade Federal de Santa Maria.
 
-## 🤝 Contribuição
+---
 
-Para contribuir com o projeto:
-
-1. Faça um fork do repositório
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
-3. Commit suas mudanças (`git commit -am 'Adiciona nova feature'`)
-4. Push para a branch (`git push origin feature/nova-feature`)
-5. Abra um Pull Request
-
-## 📞 Suporte
-
-Para dúvidas ou suporte, entre em contato com a coordenação dos cursos de Ciência da Computação ou Sistemas de Informação da UFSM.
+Projeto entregue para a disciplina de [Desenvolvimento de Software para a Web](http://github.com/andreainfufsm/elc1090-2025a) em 2025a
