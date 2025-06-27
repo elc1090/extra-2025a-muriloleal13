@@ -41,6 +41,7 @@ export default function FormPage() {
   const params = useParams();
   const formType = params.formType as FormType;
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [hasSavedData, setHasSavedData] = useState<boolean>(false);
   const themeClasses = useThemeClasses();
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormValues>({
@@ -81,6 +82,15 @@ export default function FormPage() {
     }
   });
 
+  const checkSavedData = () => {
+    try {
+      const savedData = localStorage.getItem(`tcc_form_${formType}`);
+      setHasSavedData(!!savedData);
+    } catch {
+      setHasSavedData(false);
+    }
+  };
+
   useEffect(() => {
     const urlData = parseUrlParams();
     if (urlData.studentName) setValue('studentInfo.name', urlData.studentName);
@@ -94,7 +104,9 @@ export default function FormPage() {
     if (urlData.evaluatorName) setValue('evaluatorInfo.name', urlData.evaluatorName);
     if (urlData.evaluatorInstitution) setValue('evaluatorInfo.institution', urlData.evaluatorInstitution);
     if (urlData.evaluationDate) setValue('evaluationDate', urlData.evaluationDate);
-  }, [setValue]);
+
+    checkSavedData();
+  }, [setValue, formType]);
 
   const courseOptions = [
     { value: 'CC', label: 'Ciência da Computação' },
@@ -142,6 +154,7 @@ export default function FormPage() {
     try {
       const formData = watch();
       localStorage.setItem(`tcc_form_${formType}`, JSON.stringify(formData));
+      setHasSavedData(true);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('idle'), 2000);
     } catch {
@@ -162,6 +175,7 @@ export default function FormPage() {
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus('idle'), 2000);
       } else {
+        setHasSavedData(false);
         setSaveStatus('error');
         setTimeout(() => setSaveStatus('idle'), 2000);
       }
@@ -231,14 +245,16 @@ export default function FormPage() {
       {/* Action Bar */}
       <div className={`${themeClasses.bgPrimary} border-b ${themeClasses.border} px-4 py-3`}>
         <div className="max-w-7xl mx-auto flex justify-end gap-3">
-          <button
-            type="button"
-            onClick={handleLoadForm}
-            className={`${themeClasses.btnSecondary} px-4 py-2 rounded-lg text-sm font-medium
-                       transition-all duration-200 hover:scale-105`}
-          >
-            Carregar Salvo
-          </button>
+          {hasSavedData && (
+            <button
+              type="button"
+              onClick={handleLoadForm}
+              className={`${themeClasses.btnSecondary} px-4 py-2 rounded-lg text-sm font-medium
+                         transition-all duration-200 hover:scale-105`}
+            >
+              Carregar Salvo
+            </button>
+          )}
 
           <button
             type="button"

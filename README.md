@@ -2,7 +2,8 @@
 
 Sistema web para avaliação de Trabalhos de Conclusão de Curso dos cursos de Ciência da Computação e Sistemas de Informação da Universidade Federal de Santa Maria.
 
-![EvalTCC](./public/assets/evaltcc-home.png "Screenshot do projeto")
+![EvalTCC](./public/assets/evaltcc-home.png "Homepage")
+![EvalTCC](./public/assets/evaltcc-ata.png "Formulário Ata")
 
 Acesso: https://evaltcc.netlify.app/
 
