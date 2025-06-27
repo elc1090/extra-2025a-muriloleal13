@@ -136,7 +136,7 @@ Cada formulário possui um gerador de links pré-preenchidos acessível em:
 - `advisor` - Orientador
 - `coadvisor` - Coorientador
 - `title` - Título do trabalho
-- `semester` - Semestre/Ano
+- `semester` - Semestre/Ano (formato: "semestre/ano", ex: "2025/1")
 - `evaluatorName` - Nome do avaliador
 - `evaluatorInstitution` - Instituição do avaliador
 - `evaluationDate` - Data da avaliação

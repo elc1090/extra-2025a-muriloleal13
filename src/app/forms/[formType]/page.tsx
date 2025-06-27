@@ -53,7 +53,7 @@ export default function FormPage() {
         coadvisor: '',
         title: '',
         semester: '',
-        year: new Date().getFullYear().toString()
+        year: ''
       },
       evaluatorInfo: {
         name: '',

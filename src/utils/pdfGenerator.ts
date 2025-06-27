@@ -66,12 +66,7 @@ export class PDFGenerator {
       yPos += coadvisorLines.length * 7;
     }
 
-    // Se o campo semester já contém o formato completo (ex: "2/2025"), usa apenas ele
-    // Caso contrário, concatena semester + year
-    const semesterYear = formData.studentInfo.semester.includes('/')
-      ? formData.studentInfo.semester
-      : `${formData.studentInfo.semester}/${formData.studentInfo.year}`;
-    this.doc.text(`Semestre/Ano: ${semesterYear}`, 20, yPos);
+    this.doc.text(`Semestre/Ano: ${formData.studentInfo.semester}`, 20, yPos);
     yPos += 7;
 
     this.doc.text(`Data da Avaliação: ${new Date(formData.evaluationDate).toLocaleDateString('pt-BR')}`, 20, yPos);
