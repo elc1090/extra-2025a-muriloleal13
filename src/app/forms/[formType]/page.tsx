@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Download, Save, CheckCircle, AlertCircle } from 'lucide-react';
@@ -40,7 +40,7 @@ interface FormValues {
 export default function FormPage() {
   const params = useParams();
   const formType = params.formType as FormType;
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'loading' | 'loaded' | 'error'>('idle');
   const [hasSavedData, setHasSavedData] = useState<boolean>(false);
   const themeClasses = useThemeClasses();
 
@@ -82,14 +82,14 @@ export default function FormPage() {
     }
   });
 
-  const checkSavedData = () => {
+  const checkSavedData = useCallback(() => {
     try {
       const savedData = localStorage.getItem(`tcc_form_${formType}`);
       setHasSavedData(!!savedData);
     } catch {
       setHasSavedData(false);
     }
-  };
+  }, [formType]);
 
   useEffect(() => {
     const urlData = parseUrlParams();
@@ -106,7 +106,7 @@ export default function FormPage() {
     if (urlData.evaluationDate) setValue('evaluationDate', urlData.evaluationDate);
 
     checkSavedData();
-  }, [setValue, formType]);
+  }, [setValue, formType, checkSavedData]);
 
   const courseOptions = [
     { value: 'CC', label: 'Ciência da Computação' },
@@ -164,6 +164,7 @@ export default function FormPage() {
   };
 
   const handleLoadForm = () => {
+    setSaveStatus('loading');
     try {
       const savedData = localStorage.getItem(`tcc_form_${formType}`);
       if (savedData) {
@@ -172,7 +173,7 @@ export default function FormPage() {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           setValue(key as any, value);
         });
-        setSaveStatus('saved');
+        setSaveStatus('loaded');
         setTimeout(() => setSaveStatus('idle'), 2000);
       } else {
         setHasSavedData(false);
@@ -226,16 +227,28 @@ export default function FormPage() {
                 <span className="text-sm">Salvando...</span>
               </div>
             )}
+            {saveStatus === 'loading' && (
+              <div className={`flex items-center gap-2 ${themeClasses.textSecondary}`}>
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                <span className="text-sm">Carregando...</span>
+              </div>
+            )}
             {saveStatus === 'saved' && (
               <div className={`flex items-center gap-2 ${themeClasses.success} px-3 py-1 rounded-full`}>
                 <CheckCircle className="h-4 w-4" />
                 <span className="text-sm font-medium">Salvo com sucesso!</span>
               </div>
             )}
+            {saveStatus === 'loaded' && (
+              <div className={`flex items-center gap-2 ${themeClasses.success} px-3 py-1 rounded-full`}>
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm font-medium">Dados carregados com sucesso!</span>
+              </div>
+            )}
             {saveStatus === 'error' && (
               <div className={`flex items-center gap-2 ${themeClasses.error} px-3 py-1 rounded-full`}>
                 <AlertCircle className="h-4 w-4" />
-                <span className="text-sm font-medium">Erro ao salvar</span>
+                <span className="text-sm font-medium">Erro ao carregar dados</span>
               </div>
             )}
           </div>
@@ -249,10 +262,12 @@ export default function FormPage() {
             <button
               type="button"
               onClick={handleLoadForm}
+              disabled={saveStatus === 'loading'}
               className={`${themeClasses.btnSecondary} px-4 py-2 rounded-lg text-sm font-medium
-                         transition-all duration-200 hover:scale-105`}
+                         transition-all duration-200 hover:scale-105 disabled:opacity-50
+                         disabled:cursor-not-allowed`}
             >
-              Carregar Salvo
+              {saveStatus === 'loading' ? 'Carregando...' : 'Carregar Salvo'}
             </button>
           )}
 
