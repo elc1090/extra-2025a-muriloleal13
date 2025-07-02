@@ -9,7 +9,7 @@ import { Header } from '@/components/Header';
 import { FormField } from '@/components/FormField';
 import { EvaluationTable } from '@/components/EvaluationTable';
 import { AtaForm } from '@/components/AtaForm';
-import { FormType, FormData, StudentInfo, EvaluatorInfo, EVALUATION_CRITERIA } from '@/types/forms';
+import { FormType, FormData, StudentInfo, EvaluatorInfo, EVALUATION_CRITERIA, getApprovalLimit } from '@/types/forms';
 import { parseUrlParams, getFormTitle, getFormDescription } from '@/utils/urlUtils';
 import { generateFormPDF } from '@/utils/pdfGenerator';
 import { useThemeClasses } from '@/contexts/ThemeContext';
@@ -136,6 +136,9 @@ export default function FormPage() {
   ];
 
   const onSubmit = (data: FormValues) => {
+    const course = data.studentInfo.course;
+    const approvalLimit = course ? getApprovalLimit(course) : 6; // fallback para 6 se não definido
+
     const formData: FormData = {
       id: `${formType}_${Date.now()}`,
       type: formType,
@@ -154,7 +157,7 @@ export default function FormPage() {
       })),
       generalComments: data.generalComments,
       finalScore: data.finalScore,
-      approved: data.finalScore >= 6,
+      approved: data.finalScore >= approvalLimit,
       signatures: data.signatures,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -327,7 +330,7 @@ export default function FormPage() {
                   name="studentInfo.registration"
                   register={register}
                   error={errors.studentInfo?.registration}
-                  required
+                  placeholder="Número da matrícula (opcional)"
                 />
 
                 <FormField
@@ -346,6 +349,8 @@ export default function FormPage() {
                   register={register}
                   error={errors.studentInfo?.semester}
                   placeholder="Ex: 2025/1"
+                  mask="YYYY/N"
+                  maxLength={6}
                   required
                 />
 
@@ -430,6 +435,7 @@ export default function FormPage() {
               register={register}
               watch={watch}
               setValue={setValue}
+              course={watch('studentInfo.course')}
             />
           ) : (
             <EvaluationTable
@@ -438,6 +444,7 @@ export default function FormPage() {
               watch={watch}
               setValue={setValue}
               errors={errors}
+              course={watch('studentInfo.course')}
             />
           )}
 

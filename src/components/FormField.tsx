@@ -17,6 +17,8 @@ interface FormFieldProps {
   rows?: number;
   className?: string;
   disabled?: boolean;
+  mask?: string;
+  maxLength?: number;
 }
 
 export const FormField: React.FC<FormFieldProps> = ({
@@ -30,9 +32,30 @@ export const FormField: React.FC<FormFieldProps> = ({
   options = [],
   rows = 3,
   className = '',
-  disabled = false
+  disabled = false,
+  mask,
+  maxLength
 }) => {
   const themeClasses = useThemeClasses();
+
+  // Função para aplicar máscara
+  const applyMask = (value: string, maskPattern: string) => {
+    if (!maskPattern) return value;
+
+    // Remove todos os caracteres não numéricos
+    const numbers = value.replace(/\D/g, '');
+
+    // Aplica a máscara baseada no padrão
+    if (maskPattern === 'YYYY/N') {
+      if (numbers.length <= 4) {
+        return numbers;
+      } else {
+        return `${numbers.slice(0, 4)}/${numbers.slice(4, 5)}`;
+      }
+    }
+
+    return value;
+  };
 
   const baseInputClasses = `
     ${themeClasses.input} w-full px-4 py-3 rounded-lg shadow-sm transition-all duration-200
@@ -75,11 +98,22 @@ export const FormField: React.FC<FormFieldProps> = ({
       default:
         return (
           <input
-            {...register(name, { required })}
+            {...register(name, {
+              required,
+              onChange: mask ? (e) => {
+                const maskedValue = applyMask(e.target.value, mask);
+                e.target.value = maskedValue;
+              } : undefined
+            })}
             type={type}
             placeholder={placeholder}
             disabled={disabled}
             className={baseInputClasses}
+            maxLength={maxLength}
+            onInput={mask ? (e) => {
+              const target = e.target as HTMLInputElement;
+              target.value = applyMask(target.value, mask);
+            } : undefined}
           />
         );
     }

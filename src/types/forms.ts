@@ -8,7 +8,7 @@ export type FormType =
 
 export interface StudentInfo {
   name: string;
-  registration: string;
+  registration?: string;
   course: CourseType;
   advisor: string;
   coadvisor?: string;
@@ -192,3 +192,19 @@ export interface PrefilledData {
   evaluatorInstitution?: string;
   evaluationDate?: string;
 }
+
+// Configuração de limites de aprovação por curso
+export const APPROVAL_LIMITS = {
+  CC: 6.0, // Ciência da Computação
+  SI: 7.0  // Sistemas de Informação
+} as const;
+
+// Função para obter o limite de aprovação baseado no curso
+export const getApprovalLimit = (course: CourseType): number => {
+  return APPROVAL_LIMITS[course];
+};
+
+// Função para verificar se deve mostrar status de aprovação
+export const shouldShowApprovalStatus = (approvalLimit?: number): boolean => {
+  return approvalLimit !== undefined && approvalLimit > 0;
+};

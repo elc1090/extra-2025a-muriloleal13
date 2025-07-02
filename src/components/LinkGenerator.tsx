@@ -99,6 +99,8 @@ export const LinkGenerator: React.FC<LinkGeneratorProps> = ({ formType }) => {
             name="semester"
             register={register}
             placeholder="Ex: 2025/1"
+            mask="YYYY/N"
+            maxLength={6}
           />
 
           <FormField

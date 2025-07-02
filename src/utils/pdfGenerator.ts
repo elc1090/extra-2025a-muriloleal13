@@ -4,9 +4,35 @@ import { FormData, EVALUATION_CRITERIA } from '@/types/forms';
 
 export class PDFGenerator {
   private doc: jsPDF;
+  private readonly pageHeight = 297; // A4 height in mm
+  private readonly marginBottom = 20; // Bottom margin
+  private currentCourse: string = '';
 
   constructor() {
     this.doc = new jsPDF('p', 'mm', 'a4');
+  }
+
+  private checkPageBreak(currentY: number, requiredSpace: number): number {
+    if (currentY + requiredSpace > this.pageHeight - this.marginBottom) {
+      this.doc.addPage();
+      // Adicionar cabeçalho simplificado na nova página
+      if (this.currentCourse) {
+        this.addPageHeader('', this.currentCourse);
+      }
+      return 40; // Reset to after header
+    }
+    return currentY;
+  }
+
+  private addPageHeader(_title: string, course: string) {
+    this.doc.setFontSize(12);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text('UNIVERSIDADE FEDERAL DE SANTA MARIA', 105, 15, { align: 'center' });
+    this.doc.setFontSize(10);
+    this.doc.text('CENTRO DE TECNOLOGIA', 105, 22, { align: 'center' });
+    const courseText = course === 'CC' ? 'CURSO DE CIÊNCIA DA COMPUTAÇÃO' : 'CURSO DE SISTEMAS DE INFORMAÇÃO';
+    this.doc.text(courseText, 105, 29, { align: 'center' });
+    this.doc.line(20, 32, 190, 32);
   }
 
   private addHeader(title: string, course: string) {
@@ -47,8 +73,10 @@ export class PDFGenerator {
     this.doc.text(studentLines, 20, yPos);
     yPos += studentLines.length * 7;
 
-    this.doc.text(`Matrícula: ${formData.studentInfo.registration}`, 20, yPos);
-    yPos += 7;
+    if (formData.studentInfo.registration) {
+      this.doc.text(`Matrícula: ${formData.studentInfo.registration}`, 20, yPos);
+      yPos += 7;
+    }
 
 
     const titleLines = this.doc.splitTextToSize(`Título: ${formData.studentInfo.title}`, 170);
@@ -66,17 +94,26 @@ export class PDFGenerator {
       yPos += coadvisorLines.length * 7;
     }
 
-    this.doc.text(`Semestre/Ano: ${formData.studentInfo.semester}`, 20, yPos);
+    this.doc.text(`Ano/Semestre: ${formData.studentInfo.semester}`, 20, yPos);
     yPos += 7;
 
-    this.doc.text(`Data da Avaliação: ${new Date(formData.evaluationDate).toLocaleDateString('pt-BR')}`, 20, yPos);
+    // Formatação de data que evita problemas de timezone
+    const evaluationDate = formData.evaluationDate.includes('T')
+      ? formData.evaluationDate.split('T')[0]
+      : formData.evaluationDate;
+    const [year, month, day] = evaluationDate.split('-');
+    const formattedDate = `${day}/${month}/${year}`;
+    this.doc.text(`Data da Avaliação: ${formattedDate}`, 20, yPos);
 
     return yPos + 15;
   }
 
   private addEvaluationTable(formData: FormData, startY: number) {
     const criteria = EVALUATION_CRITERIA[formData.type];
-    let yPos = startY;
+
+    // Calcular espaço necessário para a tabela (cabeçalho + critérios + nota final)
+    const tableHeight = 18 + (criteria.length * 8) + 8; // cabeçalho + linhas + nota final
+    let yPos = this.checkPageBreak(startY, tableHeight);
 
     this.doc.setFontSize(12);
     this.doc.setFont('helvetica', 'bold');
@@ -96,10 +133,10 @@ export class PDFGenerator {
 
     yPos += 8;
 
-    let totalWeightedScore = 0;
-    let totalWeight = 0;
+    let totalScore = 0;
+    let totalMaxScore = 0;
 
-
+    // Adicionar cada critério
     criteria.forEach((criterion) => {
       const score = formData.scores.find(s => s.criteriaId === criterion.id);
       const scoreValue = score?.score || 0;
@@ -113,13 +150,15 @@ export class PDFGenerator {
       this.doc.text(criterion.weight.toString(), 142, yPos + 5);
       this.doc.text(scoreValue.toString(), 162, yPos + 5);
 
-      totalWeightedScore += scoreValue * criterion.weight;
-      totalWeight += criterion.weight;
+      // Usar a mesma lógica do form: soma simples das notas
+      const validScore = Math.min(scoreValue, criterion.maxScore);
+      totalScore += validScore;
+      totalMaxScore += criterion.maxScore;
 
       yPos += 8;
     });
 
-
+    // Linha da nota final
     this.doc.rect(20, yPos, 120, 8);
     this.doc.rect(140, yPos, 20, 8);
     this.doc.rect(160, yPos, 20, 8);
@@ -128,7 +167,8 @@ export class PDFGenerator {
     this.doc.text('NOTA FINAL', 22, yPos + 5);
     this.doc.text('', 142, yPos + 5);
 
-    const finalScore = totalWeight > 0 ? (totalWeightedScore / totalWeight).toFixed(1) : '0.0';
+    // Usar a mesma fórmula do form: (totalScore / totalMaxScore) * 10
+    const finalScore = totalMaxScore > 0 ? ((totalScore / totalMaxScore) * 10).toFixed(1) : '0.0';
     this.doc.text(finalScore, 162, yPos + 5);
 
     return yPos + 15;
@@ -137,7 +177,8 @@ export class PDFGenerator {
   private addComments(formData: FormData, startY: number) {
     if (!formData.generalComments) return startY;
 
-    let yPos = startY;
+    // Verificar se há espaço suficiente para o título e pelo menos algumas linhas
+    let yPos = this.checkPageBreak(startY, 30);
 
     this.doc.setFontSize(12);
     this.doc.setFont('helvetica', 'bold');
@@ -148,13 +189,20 @@ export class PDFGenerator {
     this.doc.setFontSize(10);
 
     const lines = this.doc.splitTextToSize(formData.generalComments, 170);
+
+    // Verificar se há espaço suficiente para todos os comentários
+    const commentsHeight = lines.length * 5;
+    yPos = this.checkPageBreak(yPos, commentsHeight);
+
     this.doc.text(lines, 20, yPos);
 
-    return yPos + (lines.length * 5) + 10;
+    return yPos + commentsHeight + 10;
   }
 
   private addSignature(formData: FormData, startY: number) {
-    const yPos = startY + 20;
+    // Verificar se há espaço suficiente para a seção de assinatura (aproximadamente 80mm)
+    const requiredSpace = 80;
+    const yPos = this.checkPageBreak(startY + 20, requiredSpace);
 
     this.doc.setFontSize(10);
     this.doc.setFont('helvetica', 'normal');
@@ -198,19 +246,35 @@ export class PDFGenerator {
 
     this.doc.setFont('helvetica', 'normal');
 
+    // Verificar se os dados do avaliador existem e não estão vazios
+    const evaluatorName = (formData.evaluatorInfo?.name && formData.evaluatorInfo.name.trim())
+      ? formData.evaluatorInfo.name
+      : '_________________________________';
+    const evaluatorInstitution = (formData.evaluatorInfo?.institution && formData.evaluatorInfo.institution.trim())
+      ? formData.evaluatorInfo.institution
+      : '_________________________________';
 
-    const evaluatorNameLines = this.doc.splitTextToSize(formData.evaluatorInfo.name, 170);
+    const evaluatorNameLines = this.doc.splitTextToSize(evaluatorName, 170);
     this.doc.text(evaluatorNameLines, 20, yPos);
     yPos += evaluatorNameLines.length * 5;
 
-
-    const institutionLines = this.doc.splitTextToSize(formData.evaluatorInfo.institution, 170);
+    const institutionLines = this.doc.splitTextToSize(evaluatorInstitution, 170);
     this.doc.text(institutionLines, 20, yPos);
     yPos += institutionLines.length * 5;
 
 
     yPos += 15;
-    this.doc.text(`Santa Maria, ${new Date(formData.evaluationDate).toLocaleDateString('pt-BR')}`, 20, yPos);
+    // Formatação de data que evita problemas de timezone
+    if (formData.evaluationDate) {
+      const evaluationDate = formData.evaluationDate.includes('T')
+        ? formData.evaluationDate.split('T')[0]
+        : formData.evaluationDate;
+      const [year, month, day] = evaluationDate.split('-');
+      const formattedDate = `${day}/${month}/${year}`;
+      this.doc.text(`Santa Maria, ${formattedDate}`, 20, yPos);
+    } else {
+      this.doc.text(`Santa Maria, ___/___/______`, 20, yPos);
+    }
   }
 
   private addAtaSignatures(formData: FormData, startY: number) {
@@ -290,7 +354,17 @@ export class PDFGenerator {
 
 
     yPos += 10;
-    this.doc.text(`Santa Maria, ${new Date(formData.evaluationDate).toLocaleDateString('pt-BR')}`, 20, yPos);
+    // Formatação de data que evita problemas de timezone
+    if (formData.evaluationDate) {
+      const evaluationDate = formData.evaluationDate.includes('T')
+        ? formData.evaluationDate.split('T')[0]
+        : formData.evaluationDate;
+      const [year, month, day] = evaluationDate.split('-');
+      const formattedDate = `${day}/${month}/${year}`;
+      this.doc.text(`Santa Maria, ${formattedDate}`, 20, yPos);
+    } else {
+      this.doc.text(`Santa Maria, ___/___/______`, 20, yPos);
+    }
   }
 
   generateFormPDF(formData: FormData): void {
@@ -300,6 +374,9 @@ export class PDFGenerator {
       avaliacao_final_si: 'FICHA DE AVALIAÇÃO FINAL DE TCC - SISTEMAS DE INFORMAÇÃO',
       ata_apresentacao: 'ATA DE APRESENTAÇÃO DE TCC'
     };
+
+    // Armazenar o curso para uso em quebras de página
+    this.currentCourse = formData.studentInfo.course;
 
     this.addHeader(titles[formData.type], formData.studentInfo.course);
 

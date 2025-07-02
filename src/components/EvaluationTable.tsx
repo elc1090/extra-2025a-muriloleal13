@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { UseFormRegister, UseFormWatch, UseFormSetValue } from 'react-hook-form';
-import { FormType, EVALUATION_CRITERIA } from '@/types/forms';
+import { FormType, EVALUATION_CRITERIA, CourseType, getApprovalLimit, shouldShowApprovalStatus } from '@/types/forms';
 import { useThemeClasses } from '@/contexts/ThemeContext';
 import { Tooltip } from './Tooltip';
 import { SignatureField } from './SignatureField';
@@ -18,6 +18,8 @@ interface EvaluationTableProps {
   setValue: UseFormSetValue<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors?: any;
+  course?: CourseType;
+  approvalLimit?: number;
 }
 
 export const EvaluationTable: React.FC<EvaluationTableProps> = ({
@@ -25,12 +27,23 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
   register,
   watch,
   setValue,
-  errors
+  errors,
+  course,
+  approvalLimit
 }) => {
   const criteria = EVALUATION_CRITERIA[formType];
   const themeClasses = useThemeClasses();
 
   const scores = watch('scores') || {};
+
+  // Determinar o limite de aprovação
+  const currentApprovalLimit = approvalLimit !== undefined
+    ? approvalLimit
+    : course
+      ? getApprovalLimit(course)
+      : undefined;
+
+  const showApprovalStatus = shouldShowApprovalStatus(currentApprovalLimit);
   const calculateFinalScore = () => {
     let totalScore = 0;
     let totalMaxScore = 0;
@@ -109,21 +122,25 @@ export const EvaluationTable: React.FC<EvaluationTableProps> = ({
               }).join(' + ')}) / ${criteria.reduce((sum, c) => sum + c.maxScore, 0)} × 10 = ${finalScore.toFixed(1)}`}>
                 <div className={`px-6 py-3 rounded-lg shadow-md text-3xl font-bold text-center
                                transition-all duration-300 border-2 cursor-help
-                               ${finalScore >= 6
+                               ${showApprovalStatus && currentApprovalLimit !== undefined && finalScore >= currentApprovalLimit
                                  ? 'bg-green-100 dark:bg-green-900/30 high-contrast:bg-green-400 border-green-500 text-green-700 dark:text-green-400 high-contrast:text-black'
-                                 : 'bg-red-100 dark:bg-red-900/30 high-contrast:bg-red-400 border-red-500 text-red-700 dark:text-red-400 high-contrast:text-black'
+                                 : showApprovalStatus && currentApprovalLimit !== undefined
+                                   ? 'bg-red-100 dark:bg-red-900/30 high-contrast:bg-red-400 border-red-500 text-red-700 dark:text-red-400 high-contrast:text-black'
+                                   : 'bg-blue-100 dark:bg-blue-900/30 high-contrast:bg-blue-400 border-blue-500 text-blue-700 dark:text-blue-400 high-contrast:text-black'
                                }`}>
                   {finalScore.toFixed(1)}
                 </div>
               </Tooltip>
-              <div className={`px-6 py-3 rounded-full text-base font-bold text-center uppercase tracking-wide
-                             transition-all duration-300 shadow-md
-                             ${finalScore >= 6
-                               ? 'bg-green-500 dark:bg-green-600 high-contrast:bg-green-400 text-white high-contrast:text-black'
-                               : 'bg-red-500 dark:bg-red-600 high-contrast:bg-red-400 text-white high-contrast:text-black'
-                             }`}>
-                {finalScore >= 6 ? '✓ APROVADO' : '✗ REPROVADO'}
-              </div>
+              {showApprovalStatus && currentApprovalLimit !== undefined && (
+                <div className={`px-6 py-3 rounded-full text-base font-bold text-center uppercase tracking-wide
+                               transition-all duration-300 shadow-md
+                               ${finalScore >= currentApprovalLimit
+                                 ? 'bg-green-500 dark:bg-green-600 high-contrast:bg-green-400 text-white high-contrast:text-black'
+                                 : 'bg-red-500 dark:bg-red-600 high-contrast:bg-red-400 text-white high-contrast:text-black'
+                               }`}>
+                  {finalScore >= currentApprovalLimit ? '✓ APROVADO' : '✗ REPROVADO'}
+                </div>
+              )}
             </div>
           </div>
         </div>

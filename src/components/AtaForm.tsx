@@ -6,6 +6,7 @@ import { useThemeClasses } from '@/contexts/ThemeContext';
 import { FormField } from './FormField';
 import { SignatureField } from './SignatureField';
 import { ScoreSlider } from './ScoreSlider';
+import { CourseType, getApprovalLimit, shouldShowApprovalStatus } from '@/types/forms';
 
 interface AtaFormProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,13 +15,24 @@ interface AtaFormProps {
   watch: UseFormWatch<any>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: UseFormSetValue<any>;
+  course?: CourseType;
+  approvalLimit?: number;
 }
 
-export const AtaForm: React.FC<AtaFormProps> = ({ register, watch, setValue }) => {
+export const AtaForm: React.FC<AtaFormProps> = ({ register, watch, setValue, course, approvalLimit }) => {
   const themeClasses = useThemeClasses();
 
   const scores = watch('scores') || {};
   const notaFinal = scores.nota_final || 0;
+
+  // Determinar o limite de aprovação
+  const currentApprovalLimit = approvalLimit !== undefined
+    ? approvalLimit
+    : course
+      ? getApprovalLimit(course)
+      : undefined;
+
+  const showApprovalStatus = shouldShowApprovalStatus(currentApprovalLimit);
 
   useEffect(() => {
     setValue('finalScore', notaFinal);
@@ -161,16 +173,18 @@ export const AtaForm: React.FC<AtaFormProps> = ({ register, watch, setValue }) =
                   name="scores.nota_final"
                   required
                 />
-                <div className="flex justify-center">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
-                                 transition-all duration-300 shadow-md uppercase tracking-wide
-                                 ${notaFinal >= 6
-                                   ? 'bg-green-500 dark:bg-green-600 high-contrast:bg-green-400 text-white high-contrast:text-black'
-                                   : 'bg-red-500 dark:bg-red-600 high-contrast:bg-red-400 text-white high-contrast:text-black'
-                                 }`}>
-                    {notaFinal >= 6 ? '✓ APROVADO' : '✗ REPROVADO'}
-                  </span>
-                </div>
+                {showApprovalStatus && currentApprovalLimit !== undefined && (
+                  <div className="flex justify-center">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
+                                   transition-all duration-300 shadow-md uppercase tracking-wide
+                                   ${notaFinal >= currentApprovalLimit
+                                     ? 'bg-green-500 dark:bg-green-600 high-contrast:bg-green-400 text-white high-contrast:text-black'
+                                     : 'bg-red-500 dark:bg-red-600 high-contrast:bg-red-400 text-white high-contrast:text-black'
+                                   }`}>
+                      {notaFinal >= currentApprovalLimit ? '✓ APROVADO' : '✗ REPROVADO'}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 
