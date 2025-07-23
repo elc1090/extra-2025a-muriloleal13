@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { TooltipProvider } from "@/components/Tooltip";
 import "./globals.css";
@@ -30,6 +31,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-200`}
         suppressHydrationWarning
       >
+        <Script
+          src="https://rastro-tracker-production.up.railway.app/rastro.js"
+          data-site="cmdfa1vku0003nt7atgwxfbsq"
+          strategy="afterInteractive"
+        />
         <ThemeProvider>
           <TooltipProvider>
             {children}
