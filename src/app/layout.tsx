@@ -34,6 +34,7 @@ export default function RootLayout({
         <Script
           src="https://rastro-tracker-production.up.railway.app/rastro.js"
           data-site="cmdfa1vku0003nt7atgwxfbsq"
+          data-api="https://rastro-api-production.up.railway.app"
           strategy="afterInteractive"
         />
         <ThemeProvider>
